@@ -1,0 +1,5 @@
+# Xcode
+*.xcodeproj
+
+# OS-specific
+.DS_Store
