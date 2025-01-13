@@ -14,6 +14,7 @@
 
 int main()
 {
+    
 //    Contracts definition
     Contract contract = Contract();
     contract.symbol = "NVDL";
@@ -30,7 +31,8 @@ int main()
 //    contract2.primaryExchange = "SBF";
     
 //    Connection to the IBApp
-    App app("127.0.0.1", 4002, 1);
+    
+    App app("ib-gateway", 4004);
     app.wait("connect");
     
     Portfolio portfolio(&app, 1);

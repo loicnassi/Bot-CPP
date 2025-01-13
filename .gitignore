@@ -1,5 +1,9 @@
 # Xcode
 *.xcodeproj
+*.env
+
+
+
 
 # OS-specific
 .DS_Store

@@ -8,34 +8,53 @@
 #include "App.hpp"
 
 
-App::App(const char *host, int port, int clientId):
-    
-//  Class Attributes 
+App::App(const char *host, int port, int clientId) :
+    // Class Attributes
     EClientSocket(this, &signal),
     signal(2000),
     storedBasketStrategy(nullptr),
     storedPortfolio(nullptr),
     logs(),
-    
-//  App Attribute Management
+
+    // App Attribute Management
     orderId(0),
     requestId(0),
 
     retrieved(false),
     connected(false),
-    end(false)
-,
+    end(false),
     requests() {
-        
-    bool conn = eConnect(host, port, clientId, false);
-        
-    if (conn) {
-        reader = new EReader(this, &signal);
-        reader->start();
-        std::cout<<"Connected"<<std::endl;
+
+    try {
+        // Log the start of initialization
+        std::cout << "Initializing App..." << std::endl;
+        std::cout << "Host: " << host << ", Port: " << port << ", Client ID: " << clientId << std::endl;
+
+        // Start connection attempt
+        auto start = std::chrono::steady_clock::now();
+        bool conn = eConnect(host, port, clientId, false);
+        auto end = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+        if (conn) {
+            std::cout << "Connection established successfully to " << host << ":" << port
+                      << " in " << duration << " ms" << std::endl;
+
+            // Start the reader thread and log its state
+            reader = new EReader(this, &signal);
+            reader->start();
+            std::cout << "EReader thread started successfully." << std::endl;
+
+        } else {
+            std::cerr << "Connection failed to " << host << ":" << port
+                      << ". Error: Failed to establish socket connection." << std::endl;
+            throw std::runtime_error("Connection failed.");
+        }
+    } catch (const std::exception &ex) {
+        std::cerr << "Exception caught during connection: " << ex.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown error occurred during connection initialization." << std::endl;
     }
-    else
-        std::cout << "Failed to connect" << std::endl;
 }
 
 App::~App() { delete reader;
@@ -100,7 +119,7 @@ void App::execDetails(int reqId, const Contract &contract, const Execution &exec
 //        handlingOrders(reqId, contract, execution);
 //    }
 //    
-    printf( "ExecDetails. ReqId: %d - %s, %s, %s - %s, %ld, %s, %s, %d\n", reqId, contract.symbol.c_str(), contract.secType.c_str(), contract.currency.c_str(), execution.execId.c_str(), execution.orderId, decimalStringToDisplay(execution.shares).c_str(), decimalStringToDisplay(execution.cumQty).c_str(), execution.lastLiquidity);
+//    printf( "ExecDetails. ReqId: %d - %s, %s, %s - %s, %ld, %s, %s, %d\n", reqId, contract.symbol.c_str(), contract.secType.c_str(), contract.currency.c_str(), execution.execId.c_str(), execution.orderId, DecimalFunctions::decimalStringToDisplay(execution.shares).c_str(), DecimalFunctions::decimalStringToDisplay(execution.cumQty).c_str(), execution.lastLiquidity);
 }
 
 void App::execDetailsEnd(int reqId) {
@@ -118,10 +137,10 @@ void App::nextValidId(OrderId orderId) {
     printf("Next ID : %ld\n", orderId);
 }
 
-void App::error(int id, int code, const std::string& msg, const std::string& advancedOrderRejectJson) {
+void App::error(int id, time_t errorTime, int errorCode,const std::string& errorString, const std::string& advancedOrderRejectJson) {
     
     connected = true;
-    std::cout << "Error: " << code << ": " << msg << std::endl;
+    std::cout << "Error: " << errorCode << ": " << errorString << std::endl;
 }
 
 

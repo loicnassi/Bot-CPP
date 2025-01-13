@@ -10,6 +10,8 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <unordered_map>
+#include <variant>
 
 #include <vector>
 #include <numeric>

@@ -48,7 +48,7 @@ void Asset::orderMarketBuy(double orderQuantity, bool simulated) {
     Order order;
     order.action = "BUY";
     order.orderType = "MKT";
-    order.totalQuantity = doubleToDecimal(orderQuantity);
+    order.totalQuantity = DecimalFunctions::doubleToDecimal(orderQuantity);
     order.outsideRth = true;
     order.whatIf = simulated;
     
@@ -64,7 +64,7 @@ void Asset::orderMarketSell(double orderQuantity, bool simulated) {
     Order order;
     order.action = "SELL";
     order.orderType = "MKT";
-    order.totalQuantity = doubleToDecimal(orderQuantity);
+    order.totalQuantity = DecimalFunctions::doubleToDecimal(orderQuantity);
     order.outsideRth = true;
     order.whatIf = simulated;
     
@@ -80,7 +80,7 @@ void Asset::orderLimitBuy(double orderPrice, double orderQuantity, bool simulate
     Order order;
     order.action = "BUY";
     order.orderType = "LMT";
-    order.totalQuantity = doubleToDecimal(orderQuantity);
+    order.totalQuantity = DecimalFunctions::doubleToDecimal(orderQuantity);
     order.lmtPrice = orderPrice;
     order.outsideRth = true;
     order.whatIf = simulated;
@@ -98,7 +98,7 @@ void Asset::orderLimitSell(double orderPrice, double orderQuantity, bool simulat
     Order order;
     order.action = "SELL";
     order.orderType = "LMT";
-    order.totalQuantity = doubleToDecimal(orderQuantity);
+    order.totalQuantity = DecimalFunctions::doubleToDecimal(orderQuantity);
     order.lmtPrice = orderPrice;
     order.outsideRth = true;
     order.whatIf = simulated;

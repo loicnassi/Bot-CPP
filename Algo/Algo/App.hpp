@@ -11,6 +11,13 @@
 #include <stdio.h>
 #include <iostream>
 #include <thread>
+#include <unordered_map>
+#include <variant>
+
+#include <chrono>
+#include <thread>
+#include <stdexcept>
+#include <sstream>
 
 #include "AlgoLogs.hpp"
 
@@ -69,7 +76,7 @@ public:
     void execDetailsEnd( int reqId);
     void commissionReport( const CommissionReport& commissionReport);
     void nextValidId(OrderId orderId);
-    void error(int id, int errorCode, const std::string& errorString, const std::string& advancedOrderRejectJson);
+    void error(int id, time_t errorTime, int errorCode,const std::string& errorString, const std::string& advancedOrderRejectJson);
 
     
 //  Non used functions
@@ -81,9 +88,7 @@ public:
     virtual void tickString(TickerId tickerId, TickType tickType, const std::string& value) {};
     virtual void tickEFP(TickerId tickerId, TickType tickType, double basisPoints, const std::string& formattedBasisPoints,
         double totalDividends, int holdDays, const std::string& futureLastTradeDate, double dividendImpact, double dividendsToLastTradeDate) {};
-    virtual void orderStatus( OrderId orderId, const std::string& status, Decimal filled,
-        Decimal remaining, double avgFillPrice, int permId, int parentId,
-        double lastFillPrice, int clientId, const std::string& whyHeld, double mktCapPrice) {};
+    virtual void orderStatus( OrderId orderId, const std::string& status, Decimal filled, Decimal remaining, double avgFillPrice, long long permId, int parentId, double lastFillPrice, int clientId, const std::string& whyHeld, double mktCapPrice) {};
     virtual void openOrder( OrderId orderId, const Contract&, const Order&, const OrderState&) {};
     virtual void openOrderEnd() {};
     virtual void winError( const std::string& str, int lastError) {};
@@ -117,6 +122,7 @@ public:
     virtual void deltaNeutralValidation(int reqId, const DeltaNeutralContract& deltaNeutralContract) {};
     virtual void tickSnapshotEnd( int reqId) {};
     virtual void marketDataType( TickerId reqId, int marketDataType) {};
+    virtual void commissionAndFeesReport( const CommissionAndFeesReport& commissionAndFeesReport) {};
     virtual void position( const std::string& account, const Contract& contract, Decimal position, double avgCost) {};
     virtual void positionEnd() {};
     virtual void verifyMessageAPI( const std::string& apiData) {};
