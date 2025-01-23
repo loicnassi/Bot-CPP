@@ -41,7 +41,8 @@ public:
     double position;
   
 //  Data handling
-    void getRealTime(int barSize=5, bool userRTH=false);
+    void getRealTime(int barSize=5, bool useRTH=false);
+    void getHistorical(std::string barSize, std::string durationStr, std::string endDateTime, bool keepUpdate, int useRTH);
     
 //  Order Management
     void orderMarketBuy(double orderQuantity, bool simulated=false);
@@ -51,7 +52,6 @@ public:
     void closePositions(double orderQuantity=0, bool simulated=false);
     
 //  Annexe functions
-    void fit();
     void computeReturnsMean();
     void computeReturnsStd();
     void computeReturns(); // Forward declaration, function has to be declared in Pairs

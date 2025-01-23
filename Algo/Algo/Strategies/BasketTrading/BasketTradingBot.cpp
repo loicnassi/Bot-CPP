@@ -13,7 +13,6 @@ BasketTradingBot::BasketTradingBot(std::vector<Basket*> baskets, App *app):
     baskets(baskets),
     params()
     {
-
         app->storedBasketStrategy = this;
         portfolio = app->storedPortfolio;
         
@@ -28,7 +27,7 @@ BasketTradingBot::~BasketTradingBot() {
 //Pair Trading Bot function. Forward declaration in the App.hpp file
 void Basket::tradingStrategy(Basket *basket) {
 
-    const std::unordered_map<std::string, std::variant<int, double, std::vector<double>>> &ref(storedStrategy->params[basket->name]);
+    const std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>> &ref(storedStrategy->params[basket->name]);
     const double &exit = std::get<double>(ref.at("Exit"));
     const double &threshold = std::get<double>(ref.at("Threshold"));
     const double &security = std::get<double>(ref.at("Security"));
@@ -47,28 +46,63 @@ void Basket::tradingStrategy(Basket *basket) {
         }
     }
 
-void BasketTradingBot::launch(std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>>>> params) {
-
+void BasketTradingBot::fit(std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params) {
+    
     this->params = params;
     computeCapitalAllocation();
     
+    std::vector<std::future<void>> basket_futures;
+    
     for(std::size_t i = 0; i < baskets.size(); ++i) {
-        const std::unordered_map<std::string, std::variant<int, double, std::vector<double>>> &ref(params[baskets[i]->name]);
+        basket_futures.push_back(std::async(std::launch::async, [&, i] {
+            const auto &ref(params[baskets[i]->name]);
+            baskets[i]->basketLookBack = std::get<double>(ref.at("Lookback"));
+            baskets[i]->hedgeRatio = std::get<std::vector<double>>(ref.at("HedgeRatio"));
+            baskets[i]->spreadMeanDrift = std::get<double>(ref.at("MeanDrift"));
+            baskets[i]->spreadStdDrift = std::get<double>(ref.at("VolatilityDrift"));
         
-        baskets[i]->basketLookBack = std::get<double>(ref.at("Lookback"));
-        baskets[i]->hedgeRatio = std::get<std::vector<double>>(ref.at("HedgeRatio"));
-        baskets[i]->spreadMeanDrift = std::get<double>(ref.at("MeanDrift"));
-        baskets[i]->spreadStdDrift = std::get<double>(ref.at("VolatilityDrift"));
+            std::vector<std::future<void>> asset_futures;
+            
+            for (std::size_t j = 0; j < baskets[i]->assets.size(); ++j) {
+                asset_futures.push_back(std::async(std::launch::async, [&, i, j] {
+
+                    baskets[i]->assets[j]->lookback = std::get<double>(ref.at("Lookback"));
+                    baskets[i]->assets[j]->getHistorical(std::get<std::string>(ref.at("BarSize")), std::get<std::string>(ref.at("DurationStr")), "", true, 0);
+                }));
+            }
+            
+            for (auto &future : asset_futures) { future.get();}
+            
+        }));
+    }
+    
+    for (auto &future : basket_futures) { future.get(); }
+    
+    for (std::size_t i = 0; i < baskets.size(); ++i) {
+        for (std::size_t k = 0; k < baskets[i]->assets[0]->prices.size(); ++k) {
+            for (std::size_t j = 0; j < baskets[i]->assets.size(); ++j) {
+                baskets[i]->assets[i]->lastPrice = baskets[i]->assets[i]->prices[k];
+                baskets[i]->computeSpread();
+            }
+        }
+        baskets[i]->computeSpreadZScore();
+        baskets[i]->computeSpreadDrift();
+    }
+}
+
+void BasketTradingBot::launch() {
+    
+    for(std::size_t i = 0; i < baskets.size(); ++i) {
+        const auto &ref(params[baskets[i]->name]);
         
         for (std::size_t j = 0; j < baskets[i]->assets.size(); ++j) {
-            baskets[i]->assets[j]->lookback = std::get<double>(ref.at("Lookback"));
-            baskets[i]->assets[j]->getRealTime(std::get<int>(ref.at("Barsize")));
+            baskets[i]->assets[j]->getRealTime(std::get<int>(ref.at("BarSizeConsolidation")));
         }
         
         std::ostringstream logStream;
         logStream << "Launch Basket Trading Strategy" <<
         "\n=============================" <<
-        "\nBarsize : " << std::get<int>(ref.at("Barsize")) <<
+        "\nBarsize : " << std::get<std::string>(ref.at("BarSize")) <<
         "\nLookback Period : " << std::get<double>(ref.at("Lookback")) <<
         "\nThreshold : " << std::get<double>(ref.at("Threshold")) <<
         "\nExit : " << std::get<double>(ref.at("Exit")) <<

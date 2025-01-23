@@ -33,13 +33,23 @@ Asset::~Asset() {
 }
 
 //Data handling
-void Asset::getRealTime(int barSize, bool userRTH) {
+void Asset::getRealTime(int barSize, bool useRTH) {
+    
+    double id = app->incrementRequestId();
+    app->requests[id] = this;
     
     this->barSize = barSize;
+    app->reqRealTimeBars(id, contract, barSize, whatToShow, useRTH, TagValueListSPtr());
     
-    app->reqRealTimeBars(app->requestId, contract, barSize, whatToShow, userRTH, TagValueListSPtr());
-    app->requests[app->requestId] = this;
-    app->requestId ++;
+}
+
+void Asset::getHistorical(std::string barSize, std::string durationStr, std::string endDateTime, bool keepUpdate, int useRTH) {
+    
+    double id = app->incrementRequestId();
+    app->requests[id] = this;
+    
+    app->reqHistoricalData(id, contract, endDateTime, durationStr, barSize, whatToShow, useRTH, 2, keepUpdate, TagValueListSPtr());
+    app->wait("retrieve", id);
 }
 
 //Order Management
@@ -53,8 +63,12 @@ void Asset::orderMarketBuy(double orderQuantity, bool simulated) {
     order.whatIf = simulated;
     
     if (not simulated) {
-        order.orderId = app->orderId++;
+        double id = app->incrementOrderId();
+        order.orderId = id;
         position += orderQuantity;
+    }
+    else {
+        order.orderId = app->orderId;
     }
     app->placeOrder(order.orderId, contract, order);
 }
@@ -69,8 +83,12 @@ void Asset::orderMarketSell(double orderQuantity, bool simulated) {
     order.whatIf = simulated;
     
     if (not simulated) {
-        order.orderId = app->orderId++;
+        double id = app->incrementOrderId();
+        order.orderId = id;
         position -= orderQuantity;
+    }
+    else {
+        order.orderId = app->orderId;
     }
     app->placeOrder(order.orderId, contract, order);
 }
@@ -87,8 +105,12 @@ void Asset::orderLimitBuy(double orderPrice, double orderQuantity, bool simulate
     
     
     if (not simulated) {
-        order.orderId = app->orderId++;
+        double id = app->incrementOrderId();
+        order.orderId = id;
         position += orderQuantity;
+    }
+    else {
+        order.orderId = app->orderId;
     }
     app->placeOrder(order.orderId, contract, order);
 }
@@ -104,8 +126,12 @@ void Asset::orderLimitSell(double orderPrice, double orderQuantity, bool simulat
     order.whatIf = simulated;
     
     if (not simulated) {
-        order.orderId = app->orderId++;
+        double id = app->incrementOrderId();
+        order.orderId = id;
         position -= orderQuantity;
+    }
+    else {
+        order.orderId = app->orderId;
     }
     app->placeOrder(order.orderId, contract, order);
     
@@ -123,12 +149,6 @@ void Asset::closePositions(double orderQuantity, bool simulated) {
     else if (position < 0) {
         orderMarketBuy(-orderQuantity, simulated);
     }
-}
-
-void Asset::fit() {
-    
-//function to retrieve historical data and prepare Asset
-
 }
 
 void Asset::computeReturns() {
@@ -174,7 +194,6 @@ void Asset::computeReturnsStd() {
 double Asset::computeSlippage() {
     
     double slippage = exp(returnsStd) - 1;
-    
     return slippage;
 }
 

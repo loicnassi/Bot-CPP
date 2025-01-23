@@ -21,10 +21,10 @@ public:
     Portfolio *portfolio;
     std::vector<Basket*> baskets;
     
-    std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>>>> params;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params;
     
-    void launch(std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>>>> params);
-
+    void launch();
+    void fit(std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params);
     
     void computeCapitalAllocation();
     

@@ -43,10 +43,9 @@ Basket::Basket(std::vector<Asset*> assets):
 Basket::~Basket() {
 }
 
-void App::handlingBar(Asset *asset, Bar bar) {
+void App::handleBar(long reqId, Asset *asset, Bar bar) {
 
     asset->barConsolidation += 5;
-    
     if (asset->barConsolidation == 5) {
         asset->lastPrice = bar;
     }
@@ -75,11 +74,39 @@ void App::handlingBar(Asset *asset, Bar bar) {
             logs.printLog(logStream.str());
             
             if (asset->storedBasket) {
-                asset->storedBasket->basketPipeline();
+                asset->storedBasket->basketPipeline(false);
             }
         }
         asset->barConsolidation = 0;
     }
+}
+
+void App::fitBar(long reqId, Asset *asset, Bar bar, bool update) {
+    
+    if (update==true) {
+        
+        if (bar.time == asset->lastPrice.time) {
+            asset->prices.erase(--asset->prices.end());
+            asset->prices.push_back(bar);
+        }
+        else {
+            cancelHistoricalData(reqId);
+            retrieved[reqId] = true;
+        }
+    }
+    else {
+        asset->prices.push_back(bar);
+        
+        if (asset->prices.size() > asset->lookback) {
+            asset->prices.erase(asset->prices.begin());
+        }
+    }
+    
+    asset->lastPrice = bar;
+    
+//    std::ostringstream logStream;
+//    logStream << asset->contract.symbol << " | Price Last Bar fit : " << bar.close;
+//    logs.printLog(logStream.str());
 }
 
 
@@ -160,7 +187,7 @@ void Basket::computeQuantites() {
                    );
 }
 
-void Basket::basketPipeline() {
+void Basket::basketPipeline(bool fit) {
     
     std::vector<std::string> pricesTimes;
     std::vector<unsigned long> pricesSizes;
@@ -177,11 +204,13 @@ void Basket::basketPipeline() {
             assets[i]->computeReturnsMean();
             assets[i]->computeReturnsStd();
         }
-            
+        
         computeSpread();
         computeSpreadZScore();
         computeSpreadDrift();
-        tradingStrategy(this);
+        if (not fit) {
+            tradingStrategy(this);
+        }
     }
 }
 

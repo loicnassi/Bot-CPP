@@ -18,7 +18,6 @@ Portfolio::Portfolio(App *app, const double leverage, const std::string accounts
         
         app->storedPortfolio = this;
         getAccountSummary("TotalCashValue");
-        app->wait("retrieve");
 }
 
 Portfolio::~Portfolio() {
@@ -26,7 +25,7 @@ Portfolio::~Portfolio() {
 
 
 //  App function. Forward declaration in the App.hpp file
-void App::handlingSummary(int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& currency) {
+void App::handleSummary(int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& currency) {
     
     storedPortfolio->summary[tag] = value;
     
@@ -35,13 +34,14 @@ void App::handlingSummary(int reqId, const std::string& account, const std::stri
     logs.printLog(logStream.str());
 }
 
-void App::handlingOrders(int reqId, const Contract &contract, const Execution &execution) {
+void App::handleOrders(int reqId, const Contract &contract, const Execution &execution) {
     
 }
 
 
 // Acounts function
 void Portfolio::getAccountSummary(std::string tags) {
+    app->incrementRequestId();
     app->reqAccountSummary(app->requestId, accounts, tags);
-    app->requestId ++;
+    app->wait("retrieve", app->requestId);
 }

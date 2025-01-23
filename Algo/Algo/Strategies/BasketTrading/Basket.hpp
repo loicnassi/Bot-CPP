@@ -58,7 +58,7 @@ public:
     void computeSpreadDrift();
     void computeQuantites();
     
-    void basketPipeline();
+    void basketPipeline(bool fit);
     void tradingStrategy(Basket *basket); // Forward declaration, function is declared in BasketTradingBot.cpp
     
     //  Order Management

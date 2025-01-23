@@ -11,8 +11,11 @@
 #include <stdio.h>
 #include <iostream>
 #include <thread>
+#include <future>
 #include <unordered_map>
 #include <variant>
+#include <atomic>
+#include <mutex>
 
 #include <chrono>
 #include <thread>
@@ -54,22 +57,30 @@ public:
 //  App Attribute Management
     double orderId;
     double requestId;
+    std::mutex requestMutex;
+    std::mutex orderMutex;
     
-    bool retrieved;
     bool connected;
     bool end;
     
+    std::unordered_map<double, bool> retrieved;
     std::unordered_map<double, Asset*> requests;
     
 //  Created void functions
-    void wait(std::string type = "end");
-    void handlingBar(Asset* asset, Bar bar); // Forward declaration, function has to be declared in each Strategy
-    void handlingSummary(int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& currency); // Forward declaration, function has to be declared in Portfolio
-    void handlingOrders(int reqId, const Contract &contract, const Execution &execution);
+    void wait(std::string type = "end", int reqId = 0);
+    double incrementRequestId();
+    double incrementOrderId();
+    void handleBar(long reqId, Asset* asset, Bar bar); // Forward declaration, function declared in each Strategy
+    void fitBar(long reqId, Asset* asset, Bar bar, bool update); // Forward declaration, function declared in each Strategy
+    void handleSummary(int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& currency); // Forward declaration, function has to be declared in Portfolio
+    void handleOrders(int reqId, const Contract &contract, const Execution &execution);
     
 //  Used functions
     void realtimeBar(TickerId reqId, long time, double open, double high, double low, double close,
                      Decimal volume, Decimal wap, int count);
+    void historicalData(TickerId reqId, const Bar& bar);
+    void historicalDataUpdate(TickerId reqId, const Bar& bar);
+    void historicalDataEnd(int reqId, const std::string& startDateStr, const std::string& endDateStr);
     void accountSummary( int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& curency);
     void accountSummaryEnd( int reqId);
     void execDetails( int reqId, const Contract& contract, const Execution& execution);
@@ -110,8 +121,6 @@ public:
     virtual void updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, const std::string& originExch) {};
     virtual void managedAccounts( const std::string& accountsList) {};
     virtual void receiveFA(faDataType pFaDataType, const std::string& cxml) {};
-    virtual void historicalData(TickerId reqId, const Bar& bar) {};
-    virtual void historicalDataEnd(int reqId, const std::string& startDateStr, const std::string& endDateStr) {};
     virtual void scannerParameters(const std::string& xml) {};
     virtual void scannerData(int reqId, int rank, const ContractDetails& contractDetails,
         const std::string& distance, const std::string& benchmark, const std::string& projection,
@@ -152,7 +161,6 @@ public:
     virtual void historicalNewsEnd(int requestId, bool hasMore) {};
     virtual void headTimestamp(int reqId, const std::string& headTimestamp) {};
     virtual void histogramData(int reqId, const HistogramDataVector& data) {};
-    virtual void historicalDataUpdate(TickerId reqId, const Bar& bar) {};
     virtual void rerouteMktDataReq(int reqId, int conid, const std::string& exchange) {};
     virtual void rerouteMktDepthReq(int reqId, int conid, const std::string& exchange) {};
     virtual void marketRule(int marketRuleId, const std::vector<PriceIncrement> &priceIncrements) {};
