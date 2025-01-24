@@ -10,19 +10,17 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 #include <thread>
 #include <future>
 #include <unordered_map>
 #include <variant>
 #include <atomic>
 #include <mutex>
-
 #include <chrono>
-#include <thread>
 #include <stdexcept>
-#include <sstream>
 
-#include "AlgoLogs.hpp"
+#include "Logger.hpp"
 
 #include "EReader.h"
 #include "EReaderOSSignal.h"
@@ -52,7 +50,6 @@ public:
     EReaderOSSignal signal;
     BasketTradingBot *storedBasketStrategy;
     Portfolio *storedPortfolio;
-    AlgoLogs logs;
 
 //  App Attribute Management
     double orderId;

@@ -31,7 +31,7 @@ void App::handleSummary(int reqId, const std::string& account, const std::string
     
     std::ostringstream logStream;
     logStream << "Acct Summary | ReqId: " << reqId << ", Account : " << account << ", " << tag << " : " << value << " " << currency;
-    logs.printLog(logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
 }
 
 void App::handleOrders(int reqId, const Contract &contract, const Execution &execution) {

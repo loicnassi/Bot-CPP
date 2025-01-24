@@ -14,7 +14,6 @@ App::App(const char *host, int port, int clientId) :
     signal(2000),
     storedBasketStrategy(nullptr),
     storedPortfolio(nullptr),
-    logs(),
 
     // App Attribute Management
     orderId{0},
@@ -27,8 +26,13 @@ App::App(const char *host, int port, int clientId) :
 
     try {
         // Log the start of initialization
-        std::cout << "Initializing App..." << std::endl;
-        std::cout << "Host: " << host << ", Port: " << port << ", Client ID: " << clientId << std::endl;
+        Logger& logger = Logger::getInstance();
+        logger.setLogFile("log");
+        logger.enableConsoleLogging(true);
+
+        std::ostringstream logStream;
+        logStream << "Host: " << host << ", Port: " << port << ", Client ID: " << clientId;
+        logger.log(Logger::Level::INFO, logStream.str());
 
         // Start connection attempt
         bool conn = eConnect(host, port, clientId, false);
@@ -37,16 +41,19 @@ App::App(const char *host, int port, int clientId) :
             // Start the reader thread and log its state
             reader = new EReader(this, &signal);
             reader->start();
-            std::cout << "EReader thread started successfully." << std::endl;
+            logger.log(Logger::Level::INFO, "EReader thread started successfully.");
             }
         else {
-            std::cerr << "Connection failed to " << host << ":" << port << std::endl;
-            throw std::runtime_error("Connection failed.");
+            std::ostringstream logStream;
+            logStream << "Connection failed to " << host << ":" << port;
+            logger.log(Logger::Level::ERROR, logStream.str());
         }
     } catch (const std::exception &ex) {
-        std::cerr << "Exception caught during connection: " << ex.what() << std::endl;
+        std::ostringstream logStream;
+        logStream << "Exception caught during connection: " << ex.what();
+        Logger::getInstance().log(Logger::Level::ERROR, logStream.str());
     } catch (...) {
-        std::cerr << "Unknown error occurred during connection initialization." << std::endl;
+        Logger::getInstance().log(Logger::Level::ERROR, "Unknown error occurred during connection initialization.");
     }
 }
 
@@ -148,23 +155,41 @@ void App::commissionReport(const CommissionReport &commissionReport) {
 void App::nextValidId(OrderId orderId) {
     
     this->orderId = orderId;
-    printf("Next ID : %ld\n", orderId);
+    
+    std::ostringstream logStream;
+    logStream << "Next ID : " << orderId;
+    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
 }
 
 void App::error(int id, time_t errorTime, int errorCode,const std::string& errorString, const std::string& advancedOrderRejectJson) {
     
     connected = true;
-    std::cout << "Error: " << errorCode << ": " << errorString << std::endl;
+    
+    std::ostringstream logStream;
+    logStream << "Error Code " << errorCode << ": " << errorString;
+    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
 }
 
 double App::incrementRequestId() {
+    
     std::lock_guard<std::mutex> lock(requestMutex);
     requestId++;
+    
+    std::ostringstream logStream;
+    logStream << "Request ID " << requestId << " | Thread : " << std::this_thread::get_id();
+    Logger::getInstance().log(Logger::Level::DETAIL, logStream.str());
+    
     return requestId;
 }
 
 double App::incrementOrderId() {
+    
     std::lock_guard<std::mutex> lock(orderMutex);
     orderId++;
+    
+    std::ostringstream logStream;
+    logStream << "Order ID " << requestId << " | Thread : " << std::this_thread::get_id();
+    Logger::getInstance().log(Logger::Level::DETAIL, logStream.str());
+    
     return orderId;
     }

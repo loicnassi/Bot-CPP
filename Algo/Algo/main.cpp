@@ -17,19 +17,19 @@ int main()
     
 //    Contracts definition
     Contract contract = Contract();
-    contract.symbol = "NVDL";
+    contract.symbol = "AGG";
     contract.currency = "USD";
     contract.secType = "STK";
     contract.exchange = "ARCA";
     
     Contract contract2 = Contract();
-    contract2.symbol = "NVDX";
+    contract2.symbol = "BND";
     contract2.currency = "USD";
     contract2.secType = "STK";
     contract2.exchange = "ARCA";
     
 //    Connection to the IBApp
-    App app("ib-gateway", 4004);
+    App app("localhost", 7497);
     app.wait("connect");
     
     Portfolio portfolio(&app, 1);
@@ -45,18 +45,18 @@ int main()
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params;
         
     params[basket.name] = {
-        {"HedgeRatio", std::vector<double>{1.0, -1.0}},
-        {"BarSizeConsolidation", 60},
-        {"BarSize", "1 min"},
-        {"DurationStr", "180 S"},
-        {"Lookback", 5.0},
+        {"HedgeRatio", std::vector<double>{1.0, -0.8}},
+        {"BarSizeConsolidation", 5},
+        {"BarSize", "5 secs"},
+        {"DurationStr", "250 S"},
+        {"Lookback", 48.0},
         {"Threshold", 1.0},
         {"Exit", 1.0},
         {"Slippage", 1.0},
         {"Security", 1.0},
         {"Costs", 0.005},
-        {"MeanDrift", 0.00055},
-        {"VolatilityDrift", 0.00015}
+        {"MeanDrift", 0.001125},
+        {"VolatilityDrift", 0.002915}
     };
     
     BasketTradingBot basket_bot = BasketTradingBot(baskets, &app);
