@@ -32,10 +32,10 @@ int main()
     App app("localhost", 7497);
     app.wait("connect");
     
-    Portfolio portfolio(&app, 1);
+    Portfolio portfolio(app, 1);
     
-    Asset endogene(&app, contract, "MIDPOINT");
-    Asset exogene(&app, contract2, "MIDPOINT");
+    Asset endogene(app, contract, "MIDPOINT");
+    Asset exogene(app, contract2, "MIDPOINT");
     
     std::vector<Asset*> assets{&endogene, &exogene};
     Basket basket(assets);

@@ -70,9 +70,7 @@ void BasketTradingBot::fit(std::unordered_map<std::string, std::unordered_map<st
                     baskets[i]->assets[j]->getHistorical(std::get<std::string>(ref.at("BarSize")), std::get<std::string>(ref.at("DurationStr")), "", true, 0);
                 }));
             }
-            
             for (auto &future : asset_futures) { future.get();}
-            
         }));
     }
     
@@ -99,19 +97,26 @@ void BasketTradingBot::launch() {
             baskets[i]->assets[j]->getRealTime(std::get<int>(ref.at("BarSizeConsolidation")));
         }
         
-        std::ostringstream logStream;
-        logStream << "=============================" <<
-        "\nLaunch Basket Trading Strategy" <<
-        "\n=============================" <<
-        "\nBarsize : " << std::get<std::string>(ref.at("BarSize")) <<
-        "\nLookback Period : " << std::get<double>(ref.at("Lookback")) <<
-        "\nThreshold : " << std::get<double>(ref.at("Threshold")) <<
-        "\nExit : " << std::get<double>(ref.at("Exit")) <<
-        "\nSlippage : " << std::get<double>(ref.at("Slippage")) <<
-        "\nSecurity : " << std::get<double>(ref.at("Security")) <<
-        "\nTransaction Costs : " << std::get<double>(ref.at("Costs")) <<
-        "\n=============================" ;
-        Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+        Logger::getInstance().log(Logger::Level::INFO,
+            std::format(
+                "=============================\n"
+                "Launch Basket Trading Strategy\n"
+                "=============================\n"
+                "Barsize : {}\n"
+                "Lookback Period : {}\n"
+                "Threshold : {}\n"
+                "Exit : {}\n"
+                "Slippage : {}\n"
+                "Security : {}\n"
+                "Transaction Costs : {}\n"
+                "=============================",
+                std::get<std::string>(ref.at("BarSize")),
+                std::get<double>(ref.at("Lookback")),
+                std::get<double>(ref.at("Threshold")),
+                std::get<double>(ref.at("Exit")),
+                std::get<double>(ref.at("Slippage")),
+                std::get<double>(ref.at("Security")),
+                std::get<double>(ref.at("Costs"))));
     }
 }
 
@@ -120,16 +125,12 @@ void BasketTradingBot::computeCapitalAllocation() {
     portfolio->getAccountSummary("TotalCashValue");
     double buyingPower = std::stod(portfolio->summary["TotalCashValue"]) * portfolio->leverage;
     
-    std::ostringstream logStream;
-    logStream <<  "Buying Power : " << buyingPower;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
-    
+    Logger::getInstance().log(Logger::Level::INFO, std::format("Buying Power : {}", buyingPower));
+                              
     for(std::size_t i = 0; i < baskets.size(); ++i) {
         baskets[i]->capitalAllocation = std::floor(buyingPower / baskets.size());
         
-        std::ostringstream logStream;
-        logStream <<  baskets[i]->name << " | Capital Allocation : " << baskets[i]->capitalAllocation;
-        Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+        Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Capital Allocation: {}", baskets[i]->name, baskets[i]->capitalAllocation));
     };
 }
 
@@ -137,9 +138,7 @@ void Basket::computeSpreadDrift() {
     
     spreadDrift = exp(spreadMeanDrift + std::get<double>(storedStrategy->params[name]["Threshold"]) * spreadStdDrift) - 1;
 
-    std::ostringstream logStream;
-    logStream << name <<  " | Spread Drift :  " << spreadDrift;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Spread Drift: {}", name, spreadDrift));
 }
 
 double BasketTradingBot::computeCosts(Basket *basket) {
@@ -157,10 +156,8 @@ double BasketTradingBot::computeCosts(Basket *basket) {
     const double drift = basket->spreadDrift * basket->capitalAllocation * slippageRate;
     const double costs = 2 * (slippage + transaction) + drift;
 
-    std::ostringstream logStream;
-    logStream << basket->name <<  " | Slippage :  " << 2 * slippage << " / Drift : " << drift << " / Transaction Costs : " << 2 * transaction;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
-
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Slippage: {} / Drift: {} / Transaction Costs: {}", basket->name, 2 * slippage, drift, 2 * transaction));
+    
     return costs;
 }
 
@@ -178,9 +175,7 @@ double BasketTradingBot::estimatedPnl(Basket *basket) {
     double loss = computeCosts(basket);
     double pnl = profit / loss;
     
-    std::ostringstream logStream;
-    logStream << basket->name <<  " | PNL : " << profit << " - " << loss << " = " << profit - loss << " | PNL Ratio " << pnl;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());    
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | PNL: {} - {} = {} | PNL Ratio: {}", basket->name, profit, loss, profit - loss, pnl));
     
     return pnl;
 }

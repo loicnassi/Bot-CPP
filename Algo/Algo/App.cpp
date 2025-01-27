@@ -24,16 +24,13 @@ App::App(const char *host, int port, int clientId) :
     retrieved(),
     requests() {
 
+    // Log the start of initialization
+    Logger& logger = Logger::getInstance();
+    logger.setLogFile("log");
+    logger.enableConsoleLogging(true);
+        
     try {
-        // Log the start of initialization
-        Logger& logger = Logger::getInstance();
-        logger.setLogFile("log");
-        logger.enableConsoleLogging(true);
-
-        std::ostringstream logStream;
-        logStream << "Host: " << host << ", Port: " << port << ", Client ID: " << clientId;
-        logger.log(Logger::Level::INFO, logStream.str());
-
+        logger.log(Logger::Level::INFO, std::format("Host: {}, Port: {}, Client ID: {}", host, port, clientId));
         // Start connection attempt
         bool conn = eConnect(host, port, clientId, false);
 
@@ -44,14 +41,10 @@ App::App(const char *host, int port, int clientId) :
             logger.log(Logger::Level::INFO, "EReader thread started successfully.");
             }
         else {
-            std::ostringstream logStream;
-            logStream << "Connection failed to " << host << ":" << port;
-            logger.log(Logger::Level::ERROR, logStream.str());
+            logger.log(Logger::Level::ERROR, std::format("Connection failed to {}:{}", host, port));
         }
     } catch (const std::exception &ex) {
-        std::ostringstream logStream;
-        logStream << "Exception caught during connection: " << ex.what();
-        Logger::getInstance().log(Logger::Level::ERROR, logStream.str());
+        logger.log(Logger::Level::ERROR, std::format("Exception caught during connection: {}", ex.what()));
     } catch (...) {
         Logger::getInstance().log(Logger::Level::ERROR, "Unknown error occurred during connection initialization.");
     }
@@ -112,14 +105,16 @@ void App::wait(std::string type, int reqId) {
     while (!(*condition)) {
         signal.waitForSignal();
         reader->processMsgs();
-        std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-    };
-    *condition = false;
+    }
     
     if (type == "retrieve") {
         retrieved.erase(reqId);
     }
+    else {
+        *condition = false;
+    }
 }
+    
 
 void App::accountSummary(int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& currency) {
     
@@ -131,7 +126,7 @@ void App::accountSummary(int reqId, const std::string& account, const std::strin
 void App::accountSummaryEnd(int reqId) {
 
     this->cancelAccountSummary(reqId);
-    retrieved[reqId] = true;
+    retrieved[reqId]=true;
 }
 
 void App::execDetails(int reqId, const Contract &contract, const Execution &execution) {
@@ -155,29 +150,21 @@ void App::commissionReport(const CommissionReport &commissionReport) {
 void App::nextValidId(OrderId orderId) {
     
     this->orderId = orderId;
-    
-    std::ostringstream logStream;
-    logStream << "Next ID : " << orderId;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("Next ID: {}", orderId));
 }
 
 void App::error(int id, time_t errorTime, int errorCode,const std::string& errorString, const std::string& advancedOrderRejectJson) {
     
     connected = true;
-    
-    std::ostringstream logStream;
-    logStream << "Error Code " << errorCode << ": " << errorString;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("Error Code {} : {}", errorCode, errorString));
 }
 
 double App::incrementRequestId() {
     
     std::lock_guard<std::mutex> lock(requestMutex);
     requestId++;
-    
-    std::ostringstream logStream;
-    logStream << "Request ID " << requestId << " | Thread : " << std::this_thread::get_id();
-    Logger::getInstance().log(Logger::Level::DETAIL, logStream.str());
+    std::string threadId = Logger::getInstance().formatThreadId(std::this_thread::get_id());
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("RequestId : {} | Thread: {}", requestId, threadId));
     
     return requestId;
 }
@@ -186,10 +173,8 @@ double App::incrementOrderId() {
     
     std::lock_guard<std::mutex> lock(orderMutex);
     orderId++;
-    
-    std::ostringstream logStream;
-    logStream << "Order ID " << requestId << " | Thread : " << std::this_thread::get_id();
-    Logger::getInstance().log(Logger::Level::DETAIL, logStream.str());
+    std::string threadId = Logger::getInstance().formatThreadId(std::this_thread::get_id());
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("OrderId : {} | Thread: {}", orderId, threadId));
     
     return orderId;
     }

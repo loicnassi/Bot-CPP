@@ -15,27 +15,11 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <string>
 #include <atomic>
 #include <sstream>
 #include <chrono>
 #include <ctime>
-
-#include <fstream>
-#include <queue>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <string>
-#include <atomic>
-#include <sstream>
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <thread>
-#include <atomic>
-#include <condition_variable>
+#include <format>
 
 constexpr size_t QUEUE_SIZE = 1024;  // Lock-free queue capacity
 
@@ -46,8 +30,10 @@ public:
     static Logger& getInstance();
 
     void log(Level level, const std::string& message);
+    void setLogLevel(Level level);
     void setLogFile(const std::string& filename, size_t maxSize = 1024 * 1024);
     void enableConsoleLogging(bool enable);
+    std::string formatThreadId(std::thread::id id);
 
     ~Logger();
 
@@ -66,6 +52,8 @@ private:
     bool consoleLogging = false;
 
     Logger();
+    Level logLevel = Level::INFO;
+        
     void processLogs();
     void writeToFile(const std::string& logBatch);
     void rotateLogFile();

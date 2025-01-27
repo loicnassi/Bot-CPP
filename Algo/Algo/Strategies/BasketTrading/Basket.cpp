@@ -31,7 +31,7 @@ Basket::Basket(std::vector<Asset*> assets):
         for (std::size_t i = 0; i < assets.size(); ++i) {
             name += assets[i]->contract.symbol;
                 if (i != assets.size() - 1) {
-                    name += '-';
+                    name += "-";
                 }
         };
         
@@ -69,9 +69,7 @@ void App::handleBar(long reqId, Asset *asset, Bar bar) {
                 asset->prices.erase(asset->prices.begin());
             }
             
-            std::ostringstream logStream;
-            logStream << asset->contract.symbol <<  " | Price Last | Time : " << bar.time << " | Open : " << bar.open << " | Close : " << bar.close;
-            Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+            Logger::getInstance().log(Logger::Level::INFO, std::format("{}  | Price Last | Time: {} | Open: {} | Close: {}", asset->contract.symbol, bar.time, bar.open, bar.close));
             
             if (asset->storedBasket) {
                 asset->storedBasket->basketPipeline(false);
@@ -91,7 +89,7 @@ void App::fitBar(long reqId, Asset *asset, Bar bar, bool update) {
         }
         else {
             cancelHistoricalData(reqId);
-            retrieved[reqId] = true;
+            retrieved[reqId]=true;
         }
     }
     else {
@@ -102,6 +100,7 @@ void App::fitBar(long reqId, Asset *asset, Bar bar, bool update) {
         }
     }
     asset->lastPrice = bar;
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Price Last Fit | Time: {} | Open: {} | Close: {}", asset->contract.symbol, bar.time, bar.open, bar.close));
 }
 
 
@@ -120,19 +119,15 @@ void Basket::computeSpread() {
     if (spreads.size() > basketLookBack) {
         spreads.erase(spreads.begin());
     }
-    
-    std::ostringstream logStream;
-    logStream << name <<  " | Spread : " << spread;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Spread: {}", name, spread));
 }
 
 void Basket::computeSpreadMean() {
     
     spreadMean = std::reduce(spreads.begin(), spreads.end()) / spreads.size() ;
     
-    std::ostringstream logStream;
-    logStream << name <<  " | Spread Mean : " << spreadMean;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Spread Mean: {}", name, spreadMean));
 }
 
 void Basket::computeSpreadStd() {
@@ -144,10 +139,8 @@ void Basket::computeSpreadStd() {
     });
     
     spreadStd = sqrt(accum / (spreads.size()-1));
-    
-    std::ostringstream logStream;
-    logStream << name << " | Spread Volatility : " << spreadStd;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Spread Volatility: {}", name, spreadStd));
 }
 
 void Basket::computeSpreadZScore() {
@@ -157,9 +150,7 @@ void Basket::computeSpreadZScore() {
     computeSpreadStd();
     spreadsZScore = (spread - spreadMean)/spreadStd;
     
-    std::ostringstream logStream;
-    logStream << name << " | Spread Zscore : " << spreadsZScore;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Spread Zscore: {}", name, spreadsZScore));
 }
 
 void Basket::computeQuantites() {
@@ -172,10 +163,8 @@ void Basket::computeQuantites() {
     
     std::transform(hedgeRatio.begin(), hedgeRatio.end(), assets.begin(), quantities.begin(), [&](double ratio, const auto& asset) {
         double qty = std::trunc(ratio * quantity);
-        
-        std::ostringstream logStream;
-        logStream << asset->contract.symbol << " | Quantity: " << qty;
-        Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+
+        Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Quantity: {}", name, qty));
         
         return qty;
     }
@@ -223,9 +212,7 @@ void Basket::orderMarketLong() {
     }
     position = 1;
     
-    std::ostringstream logStream;
-    logStream << name << " | Basket Market Long Order";
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Basket Market Long Order", name));
 }
 
 void Basket::orderMarketShort() {
@@ -242,9 +229,7 @@ void Basket::orderMarketShort() {
     
     position = -1;
     
-    std::ostringstream logStream;
-    logStream << name << " | Basket Market Short Order";
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Basket Market Short Order", name));
 }
 
 void Basket::orderLimitLong(std::vector<double> orderPrices) {
@@ -261,9 +246,7 @@ void Basket::orderLimitLong(std::vector<double> orderPrices) {
     
     position = 1;
     
-    std::ostringstream logStream;
-    logStream << name << " | Basket Limit Long Order";
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Basket Limit Long Order", name));
 }
 
 void Basket::orderLimitShort(std::vector<double> orderPrices) {
@@ -280,9 +263,7 @@ void Basket::orderLimitShort(std::vector<double> orderPrices) {
     
     position = -1;
     
-    std::ostringstream logStream;
-    logStream << name << " | Basket Limit Short Order";
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Basket Limit Short Order", name));
 }
 
 void Basket::closePositions() {
@@ -295,7 +276,5 @@ void Basket::closePositions() {
     
     position = 0;
     
-    std::ostringstream logStream;
-    logStream << name << " | Basket Close Positions";
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Basket Limit Close Order", name));
 }

@@ -19,12 +19,12 @@ class Asset {
     
 public:
     
-    Asset(App *app, Contract contract, std::string whatToShow);
+    Asset(App &app, Contract &contract, std::string whatToShow);
     ~Asset();
     
 //  Major features
-    App *app;
-    Contract contract;
+    App &app;
+    Contract &contract;
     Basket *storedBasket;
 
     std::string whatToShow;

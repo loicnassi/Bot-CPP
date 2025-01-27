@@ -8,7 +8,7 @@
 #include "Portfolio.hpp"
 
 
-Portfolio::Portfolio(App *app, const double leverage, const std::string accounts):
+Portfolio::Portfolio(App &app, const double leverage, const std::string accounts):
 
 //  Major features
     app(app),
@@ -16,7 +16,7 @@ Portfolio::Portfolio(App *app, const double leverage, const std::string accounts
     leverage(leverage),
     summary() {
         
-        app->storedPortfolio = this;
+        app.storedPortfolio = this;
         getAccountSummary("TotalCashValue");
 }
 
@@ -29,9 +29,7 @@ void App::handleSummary(int reqId, const std::string& account, const std::string
     
     storedPortfolio->summary[tag] = value;
     
-    std::ostringstream logStream;
-    logStream << "Acct Summary | ReqId: " << reqId << ", Account : " << account << ", " << tag << " : " << value << " " << currency;
-    Logger::getInstance().log(Logger::Level::INFO, logStream.str());
+    Logger::getInstance().log(Logger::Level::INFO, std::format("Acct Summary | ReqId: {}, Account : {}, {}: {} {}", reqId, account, tag, value, currency));
 }
 
 void App::handleOrders(int reqId, const Contract &contract, const Execution &execution) {
@@ -41,7 +39,7 @@ void App::handleOrders(int reqId, const Contract &contract, const Execution &exe
 
 // Acounts function
 void Portfolio::getAccountSummary(std::string tags) {
-    app->incrementRequestId();
-    app->reqAccountSummary(app->requestId, accounts, tags);
-    app->wait("retrieve", app->requestId);
+    app.incrementRequestId();
+    app.reqAccountSummary(app.requestId, accounts, tags);
+    app.wait("retrieve", app.requestId);
 }

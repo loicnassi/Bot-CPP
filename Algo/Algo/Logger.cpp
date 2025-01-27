@@ -14,8 +14,14 @@ Logger& Logger::getInstance() {
 // Constructor
 Logger::Logger() : isRunning(true), logThread(&Logger::processLogs, this) {}
 
+std::string Logger::formatLogEntry(Level level, const std::string& message) {
+    return std::format("[{}] [{}] {}", currentTimestamp(), levelToString(level), message);
+}
+
 // Log message asynchronously
 void Logger::log(Level level, const std::string& message) {
+    if (level > logLevel) return;
+    
     std::string logEntry = formatLogEntry(level, message);
 
     size_t head = queueHead.load(std::memory_order_relaxed);
@@ -37,6 +43,10 @@ void Logger::setLogFile(const std::string& filename, size_t maxSize) {
     logFilename = filename;
     maxFileSize = maxSize;
     rotateLogFile();
+}
+
+void Logger::setLogLevel(Level level) {
+    logLevel = level;
 }
 
 // Enable or disable console logging
@@ -85,18 +95,18 @@ void Logger::rotateLogFile() {
         logFile.close();
     }
 
-    std::ostringstream newFileName;
-    newFileName << logFilename << "_" << currentTimestamp() << ".log";
-    logFile.open(newFileName.str(), std::ios::app);
+    std::string newFileName = std::format("{}_{}.log", logFilename, currentTimestamp());
+    logFile.open(newFileName, std::ios::app);
 }
 
-// Get current timestamp
 std::string Logger::currentTimestamp() {
     auto now = std::chrono::system_clock::now();
     std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-    char buffer[80];
-    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localtime(&now_c));
-    return std::string(buffer);
+    
+    char buffer[20]; // Enough for "YYYY-MM-DD HH:MM:SS"
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&now_c));
+
+    return std::string(buffer); 
 }
 
 // Convert log level to string
@@ -108,6 +118,12 @@ std::string Logger::levelToString(Level level) {
         case Level::DETAIL: return "DETAIL";
         default: return "UNKNOWN";
     }
+}
+
+std::string Logger::formatThreadId(std::thread::id id) {
+    std::ostringstream oss;
+    oss << id;
+    return oss.str();
 }
 
 // Stop logging and cleanup

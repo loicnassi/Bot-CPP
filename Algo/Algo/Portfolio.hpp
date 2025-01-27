@@ -15,7 +15,7 @@
 class Portfolio {
     
 public:
-    Portfolio(App *app, const double leverage, const std::string accounts = "All");
+    Portfolio(App &app, const double leverage, const std::string accounts = "All");
     ~Portfolio();
     
     struct trade  {
@@ -30,7 +30,7 @@ public:
         bool closed;
     };
 //  Major features
-    App *app;
+    App &app;
     
     const std::string accounts;
     const double leverage;
