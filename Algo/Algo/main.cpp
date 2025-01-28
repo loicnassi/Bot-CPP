@@ -17,16 +17,18 @@ int main()
     
 //    Contracts definition
     Contract contract = Contract();
-    contract.symbol = "AGG";
+    contract.symbol = "KLAC";
     contract.currency = "USD";
     contract.secType = "STK";
-    contract.exchange = "ARCA";
+    contract.exchange = "SMART";
+//    contract.primaryExchange = "NASDAQ";
     
     Contract contract2 = Contract();
-    contract2.symbol = "BND";
+    contract2.symbol = "LRCX";
     contract2.currency = "USD";
     contract2.secType = "STK";
-    contract2.exchange = "ARCA";
+    contract2.exchange = "SMART";
+//    contract2.primaryExchange = "NASDAQ";
     
 //    Connection to the IBApp
     App app("localhost", 7497);
@@ -34,8 +36,8 @@ int main()
     
     Portfolio portfolio(app, 1);
     
-    Asset endogene(app, contract, "MIDPOINT");
-    Asset exogene(app, contract2, "MIDPOINT");
+    Asset endogene(app, contract, "TRADES");
+    Asset exogene(app, contract2, "TRADES");
     
     std::vector<Asset*> assets{&endogene, &exogene};
     Basket basket(assets);
@@ -45,18 +47,18 @@ int main()
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params;
         
     params[basket.name] = {
-        {"HedgeRatio", std::vector<double>{1.0, -0.8}},
+        {"HedgeRatio", std::vector<double>{1.0, -0.940}},
         {"BarSizeConsolidation", 5},
         {"BarSize", "5 secs"},
-        {"DurationStr", "250 S"},
-        {"Lookback", 48.0},
+        {"DurationStr", "2800 S"},
+        {"Lookback", 560.0},
         {"Threshold", 1.0},
         {"Exit", 1.0},
         {"Slippage", 1.0},
-        {"Security", 1.0},
+        {"Security", 2.0},
         {"Costs", 0.005},
-        {"MeanDrift", 0.001125},
-        {"VolatilityDrift", 0.002915}
+        {"MeanDrift", 0.0},
+        {"VolatilityDrift", 0.0}
     };
     
     BasketTradingBot basket_bot = BasketTradingBot(baskets, &app);

@@ -40,7 +40,7 @@ void Asset::getRealTime(int barSize, bool useRTH) {
     this->barSize = barSize;
     app.reqRealTimeBars(id, contract, barSize, whatToShow, useRTH, TagValueListSPtr());
     
-    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Retrieve Real Time Bar | Bar Size : {}", contract.symbol, barSize));
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Retrieve Real Time Bar | Bar Size: {}", contract.symbol, barSize));
 }
 
 void Asset::getHistorical(std::string barSize, std::string durationStr, std::string endDateTime, bool keepUpdate, int useRTH) {
@@ -49,7 +49,7 @@ void Asset::getHistorical(std::string barSize, std::string durationStr, std::str
     app.requests[id] = this;
     app.reqHistoricalData(id, contract, endDateTime, durationStr, barSize, whatToShow, useRTH, 2, keepUpdate, TagValueListSPtr());
     
-    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Retrieve Historical Data | Bar Size : {} | Duration : {}", contract.symbol, barSize, durationStr));
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Retrieve Historical Data | Bar Size: {} | Duration: {}", contract.symbol, barSize, durationStr));
     app.wait("retrieve", id);
 }
 
@@ -73,7 +73,7 @@ void Asset::orderMarketBuy(double orderQuantity, bool simulated) {
     }
     app.placeOrder(order.orderId, contract, order);
     
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Market Order Buy | Quantity : {}", contract.symbol, orderQuantity));
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Market Order Buy | Quantity: {}", contract.symbol, orderQuantity));
 }
     
 void Asset::orderMarketSell(double orderQuantity, bool simulated) {
@@ -95,7 +95,7 @@ void Asset::orderMarketSell(double orderQuantity, bool simulated) {
     }
     app.placeOrder(order.orderId, contract, order);
     
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Market Order Sell | Quantity : {}", contract.symbol, orderQuantity));
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Market Order Sell | Quantity: {}", contract.symbol, orderQuantity));
 }
 
 void Asset::orderLimitBuy(double orderPrice, double orderQuantity, bool simulated) {
@@ -119,7 +119,7 @@ void Asset::orderLimitBuy(double orderPrice, double orderQuantity, bool simulate
     }
     app.placeOrder(order.orderId, contract, order);
     
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Limit Order Buy | Price : {} | Quantity : {}", contract.symbol, orderPrice, orderQuantity));
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Limit Order Buy | Price: {} | Quantity: {}", contract.symbol, orderPrice, orderQuantity));
 }
     
 void Asset::orderLimitSell(double orderPrice, double orderQuantity, bool simulated) {
@@ -142,7 +142,7 @@ void Asset::orderLimitSell(double orderPrice, double orderQuantity, bool simulat
     }
     app.placeOrder(order.orderId, contract, order);
     
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Limit Order Sell | Price : {} | Quantity : {}", contract.symbol, orderPrice, orderQuantity));
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Limit Order Sell | Price: {} | Quantity: {}", contract.symbol, orderPrice, orderQuantity));
 }
 
 void Asset::closePositions(double orderQuantity, bool simulated) {
@@ -175,7 +175,7 @@ void Asset::computeReturns() {
             returns.erase(returns.begin());
         }
         
-        Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Return : {}", contract.symbol, priceReturn));
+        Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Return: {}", contract.symbol, priceReturn));
     }
 }
 
@@ -184,7 +184,7 @@ void Asset::computeReturnsMean() {
     unsigned long returnsSize = returns.size();
     returnsMean = std::reduce(returns.begin(), returns.end()) / returnsSize;
     
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Returns Mean : {}", contract.symbol, returnsMean));
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Returns Mean: {}", contract.symbol, returnsMean));
 }
 
 void Asset::computeReturnsStd() {
@@ -196,14 +196,14 @@ void Asset::computeReturnsStd() {
     });
     
     returnsStd = sqrt(accum / (returns.size()-1));
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Returns Volatility : {}", contract.symbol, returnsStd));
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Returns Volatility: {}", contract.symbol, returnsStd));
 }
 
 double Asset::computeSlippage() {
     
     double slippage = exp(returnsStd) - 1;
     
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Slippage : {}", contract.symbol, slippage));
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Slippage: {}", contract.symbol, slippage));
     
     return slippage;
 }
@@ -213,7 +213,7 @@ double Asset::estimatedCosts(double positionQuantity, double transactionCosts) {
     double positionAmount = positionQuantity * lastPrice.close;
     double costs = fmin(fmax(positionQuantity * transactionCosts, 1.0)/positionAmount, 0.01) * (positionAmount);
     
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Costs : {}", contract.symbol, costs));
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Costs: {}", contract.symbol, costs));
     
     return costs;
 }

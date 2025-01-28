@@ -79,13 +79,14 @@ void App::historicalData(TickerId reqId, const Bar &bar) {
 }
 
 void App::historicalDataUpdate(TickerId reqId, const Bar &bar) {
-    
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("ReqId {} | Update Price", reqId));
     if (storedBasketStrategy) {
         fitBar(reqId, this->requests[reqId], bar, true);
     }
 }
 
 void App::historicalDataEnd(int reqId, const std::string& startDateStr, const std::string& endDateStr) {
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("Request Id {} | End of Historical Data | Start date: {} | End Date: {}", reqId, startDateStr, endDateStr));
 }
 
 void App::wait(std::string type, int reqId) {

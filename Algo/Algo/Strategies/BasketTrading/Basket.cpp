@@ -90,7 +90,9 @@ void App::fitBar(long reqId, Asset *asset, Bar bar, bool update) {
         else {
             cancelHistoricalData(reqId);
             retrieved[reqId]=true;
+            Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | End of update fit | Time: {} | Open: {} | Close: {}", asset->contract.symbol, bar.time, bar.open, bar.close));
         }
+        Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Price Last Update Fit | Time: {} | Open: {} | Close: {}", asset->contract.symbol, bar.time, bar.open, bar.close));
     }
     else {
         asset->prices.push_back(bar);
@@ -98,9 +100,9 @@ void App::fitBar(long reqId, Asset *asset, Bar bar, bool update) {
         if (asset->prices.size() > asset->lookback) {
             asset->prices.erase(asset->prices.begin());
         }
+        Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Price Last Fit | Time: {} | Open: {} | Close: {}", asset->contract.symbol, bar.time, bar.open, bar.close));
     }
     asset->lastPrice = bar;
-    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Price Last Fit | Time: {} | Open: {} | Close: {}", asset->contract.symbol, bar.time, bar.open, bar.close));
 }
 
 
@@ -221,7 +223,7 @@ void Basket::orderMarketShort() {
     
     for (std::size_t i = 0; i < assets.size(); ++i) {
         if (-quantities[i] > 0){
-            assets[i]->orderMarketBuy(quantities[i]);
+            assets[i]->orderMarketBuy(-quantities[i]);
         }
         else if (-quantities[i] < 0)
             assets[i]->orderMarketSell(quantities[i]);
@@ -276,5 +278,5 @@ void Basket::closePositions() {
     
     position = 0;
     
-    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Basket Limit Close Order", name));
+    Logger::getInstance().log(Logger::Level::INFO, std::format("{} | Basket Close Order", name));
 }

@@ -32,7 +32,9 @@ void Basket::tradingStrategy(Basket *basket) {
     const double &threshold = std::get<double>(ref.at("Threshold"));
     const double &security = std::get<double>(ref.at("Security"));
     
-    if ((position == 1 && spreadsZScore > exit * threshold) || (position == -1 && spreadsZScore < -exit * threshold)) {
+    Logger::getInstance().log(Logger::Level::DETAIL, std::format("{} | Current Position: {}", name, position));
+    
+    if ((position == 1 && spreadsZScore > (exit * threshold)) || (position == -1 && spreadsZScore < (-exit * threshold))) {
             closePositions();
         }
     
@@ -149,7 +151,7 @@ double BasketTradingBot::computeCosts(Basket *basket) {
     
     for (std::size_t i = 0; i < basket->assets.size(); ++i) {
         const auto& asset = basket->assets[i];
-        slippage += asset->computeSlippage() * asset->lastPrice.close * basket->quantities[i] * slippageRate;
+        slippage += asset->computeSlippage() * asset->lastPrice.close * abs(basket->quantities[i]) * slippageRate;
         transaction += asset->estimatedCosts(basket->quantities[i], transactionCostRate);
     }
 
@@ -167,7 +169,7 @@ double BasketTradingBot::estimatedPnl(Basket *basket) {
     double investment = 0.0;
     
     for(std::size_t i = 0; i < basket->assets.size(); ++i) {
-        investment += basket->assets[i]->lastPrice.close * basket->quantities[i];
+        investment += basket->assets[i]->lastPrice.close * abs(basket->quantities[i]);
     }
     
     const int spreadsZScoreSign = (basket->spreadsZScore > 0) - (basket->spreadsZScore < 0);

@@ -52,7 +52,7 @@ private:
     bool consoleLogging = false;
 
     Logger();
-    Level logLevel = Level::INFO;
+    Level logLevel = Level::DETAIL;
         
     void processLogs();
     void writeToFile(const std::string& logBatch);
