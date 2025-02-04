@@ -18,26 +18,29 @@ public:
     Portfolio(App &app, const double leverage, const std::string accounts = "All");
     ~Portfolio();
     
-    struct trade  {
+    struct Trade {
         std::string symbol;
-        std::string entryTime;
-        double entryPrice;
-        int quantity;
+        std::string side;
+        double quantity;
+        double avgPrice;
         double currentPrice;
-        double curentPnL;
-        double closeTime;
-        double closePrice;
-        bool closed;
+        double currentPnl;
+        std::optional<Contract> contract;
+        std::optional<Execution> execution;
+        std::optional<CommissionReport> commissionReport;
     };
 //  Major features
     App &app;
     
     const std::string accounts;
     const double leverage;
-    std::vector<trade> portfolioPositions;
-    std::map<std::string, std::string> summary; // Summary data arrive as string function std::stod() when needed to transform in double
+    std::unordered_map<std::string, Trade> portfolioPositions;
+    std::unordered_map<std::string, std::string> summary; // Summary data arrive as string function std::stod() when needed to transform in double
     
     void getAccountSummary(std::string tags);
+    void getPositions();
+    void computePnl(Trade &trade);
+    void fit(Asset &asset);
     
 };
 

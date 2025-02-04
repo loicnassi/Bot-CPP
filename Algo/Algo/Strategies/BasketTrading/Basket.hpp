@@ -34,10 +34,10 @@ public:
     std::string name;
     BasketTradingBot *storedStrategy;
     
+    std::vector<double> hedgeRatio;
     std::vector<double> spreads;
     double spreadsZScore;
     double basketLookBack;
-    std::vector<double> hedgeRatio;
     
     double spreadMean;
     double spreadStd;
@@ -57,6 +57,7 @@ public:
     void computeSpreadZScore();
     void computeSpreadDrift();
     void computeQuantites();
+    void computePnl();
     
     void basketPipeline(bool fit);
     void tradingStrategy(Basket *basket); // Forward declaration, function is declared in BasketTradingBot.cpp
@@ -64,8 +65,6 @@ public:
     //  Order Management
     void orderMarketLong();
     void orderMarketShort();
-    void orderLimitLong(std::vector<double> orderPrices);
-    void orderLimitShort(std::vector<double> orderPrices);
     void closePositions();
 };
     

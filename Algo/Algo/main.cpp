@@ -15,16 +15,22 @@
 int main()
 {
     
+    // Log the start of initialization
+    Logger& logger = Logger::getInstance();
+    logger.setLogFile("log");
+    logger.enableConsoleLogging(true);
+    logger.setLogLevel(Logger::Level::DETAIL);
+    
 //    Contracts definition
     Contract contract = Contract();
-    contract.symbol = "KLAC";
+    contract.symbol = "CSX";
     contract.currency = "USD";
     contract.secType = "STK";
     contract.exchange = "SMART";
 //    contract.primaryExchange = "NASDAQ";
     
     Contract contract2 = Contract();
-    contract2.symbol = "LRCX";
+    contract2.symbol = "TWM";
     contract2.currency = "USD";
     contract2.secType = "STK";
     contract2.exchange = "SMART";
@@ -36,8 +42,8 @@ int main()
     
     Portfolio portfolio(app, 1);
     
-    Asset endogene(app, contract, "TRADES");
-    Asset exogene(app, contract2, "TRADES");
+    Asset endogene(app, contract, "MIDPOINT");
+    Asset exogene(app, contract2, "MIDPOINT");
     
     std::vector<Asset*> assets{&endogene, &exogene};
     Basket basket(assets);
@@ -47,24 +53,24 @@ int main()
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params;
         
     params[basket.name] = {
-        {"HedgeRatio", std::vector<double>{1.0, -0.940}},
+        {"HedgeRatio", std::vector<double>{1.0, 0.35}},
         {"BarSizeConsolidation", 5},
         {"BarSize", "5 secs"},
-        {"DurationStr", "2800 S"},
-        {"Lookback", 560.0},
+        {"DurationStr", "8275 S"},
+        {"Lookback", 1655.0}, // This variable has to be set as a double ".0", if not --> error
         {"Threshold", 1.0},
         {"Exit", 1.0},
         {"Slippage", 1.0},
         {"Security", 2.0},
+//        {"Stop Loss", 0.0},
         {"Costs", 0.005},
         {"MeanDrift", 0.0},
         {"VolatilityDrift", 0.0}
     };
     
     BasketTradingBot basket_bot = BasketTradingBot(baskets, &app);
-    basket_bot.fit(params);
-    basket_bot.launch();
-    
+    basket_bot.launch(params, true);
+//    
     app.wait();
     app.eDisconnect();
 

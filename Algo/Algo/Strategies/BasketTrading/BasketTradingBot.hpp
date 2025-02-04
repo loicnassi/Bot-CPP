@@ -23,7 +23,7 @@ public:
     
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params;
     
-    void launch();
+    void launch(std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params, bool fit = true);
     void fit(std::unordered_map<std::string, std::unordered_map<std::string, std::variant<int, double, std::vector<double>, std::string>>> params);
     
     void computeCapitalAllocation();

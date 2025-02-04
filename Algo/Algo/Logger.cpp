@@ -15,7 +15,7 @@ Logger& Logger::getInstance() {
 Logger::Logger() : isRunning(true), logThread(&Logger::processLogs, this) {}
 
 std::string Logger::formatLogEntry(Level level, const std::string& message) {
-    return std::format("[{}] [{}] {}", currentTimestamp(), levelToString(level), message);
+    return format("[{}] [{}] {}", currentTimestamp(), levelToString(level), message);
 }
 
 // Log message asynchronously
@@ -73,7 +73,7 @@ void Logger::processLogs() {
         }
 
         queueTail.store(tail, std::memory_order_release);
-        std::this_thread::sleep_for(std::chrono::nanoseconds(1)); // Avoid busy-waiting
+        std::this_thread::sleep_for(std::chrono::nanoseconds(1));
     }
 }
 

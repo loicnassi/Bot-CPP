@@ -71,6 +71,8 @@ public:
     void fitBar(long reqId, Asset* asset, Bar bar, bool update); // Forward declaration, function declared in each Strategy
     void handleSummary(int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& currency); // Forward declaration, function has to be declared in Portfolio
     void handleOrders(int reqId, const Contract &contract, const Execution &execution);
+    void handlePositions(const Contract &contract, Decimal position, double avgCost);
+    void fetchAsset(const Contract &contract, std::string side, double quantity);
     
 //  Used functions
     void realtimeBar(TickerId reqId, long time, double open, double high, double low, double close,
@@ -80,6 +82,7 @@ public:
     void historicalDataEnd(int reqId, const std::string& startDateStr, const std::string& endDateStr);
     void accountSummary( int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& curency);
     void accountSummaryEnd( int reqId);
+    void position(const std::string& account, const Contract& contract, Decimal position, double avgCost);
     void execDetails( int reqId, const Contract& contract, const Execution& execution);
     void execDetailsEnd( int reqId);
     void commissionReport( const CommissionReport& commissionReport);
@@ -129,7 +132,6 @@ public:
     virtual void tickSnapshotEnd( int reqId) {};
     virtual void marketDataType( TickerId reqId, int marketDataType) {};
     virtual void commissionAndFeesReport( const CommissionAndFeesReport& commissionAndFeesReport) {};
-    virtual void position( const std::string& account, const Contract& contract, Decimal position, double avgCost) {};
     virtual void positionEnd() {};
     virtual void verifyMessageAPI( const std::string& apiData) {};
     virtual void verifyCompleted( bool isSuccessful, const std::string& errorText) {};

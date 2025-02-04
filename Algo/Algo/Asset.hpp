@@ -41,14 +41,12 @@ public:
     double position;
   
 //  Data handling
-    void getRealTime(int barSize=5, bool useRTH=false);
+    void getRealTime(int barSize=5, bool useRTH=true);
     void getHistorical(std::string barSize, std::string durationStr, std::string endDateTime, bool keepUpdate, int useRTH);
     
 //  Order Management
     void orderMarketBuy(double orderQuantity, bool simulated=false);
     void orderMarketSell(double orderQuantity, bool simulated=false);
-    void orderLimitBuy(double orderPrice, double orderQuantity, bool simulated=false);
-    void orderLimitSell(double orderPrice, double orderQuantity, bool simulated=false);
     void closePositions(double orderQuantity=0, bool simulated=false);
     
 //  Annexe functions
