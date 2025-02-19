@@ -181,3 +181,8 @@ void App::position(const std::string& account, const Contract& contract, Decimal
     Logger::getInstance().log(Logger::Level::DETAIL, std::format("Account: {} | Contract: {} | Position: {} | Average Cost {}", account, contract.symbol, DecimalFunctions::decimalStringToDisplay(position), avgCost));
     
 }
+
+void App::positionEnd() {
+    
+    cancelPositions();
+}

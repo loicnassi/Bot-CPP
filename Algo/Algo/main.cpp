@@ -56,7 +56,7 @@ int main()
         {"HedgeRatio", std::vector<double>{1.0, 0.35}},
         {"BarSizeConsolidation", 5},
         {"BarSize", "5 secs"},
-        {"DurationStr", "8275 S"},
+        {"DurationStr", "8280 S"},
         {"Lookback", 1655.0}, // This variable has to be set as a double ".0", if not --> error
         {"Threshold", 1.0},
         {"Exit", 1.0},

@@ -83,6 +83,7 @@ public:
     void accountSummary( int reqId, const std::string& account, const std::string& tag, const std::string& value, const std::string& curency);
     void accountSummaryEnd( int reqId);
     void position(const std::string& account, const Contract& contract, Decimal position, double avgCost);
+    void positionEnd();
     void execDetails( int reqId, const Contract& contract, const Execution& execution);
     void execDetailsEnd( int reqId);
     void commissionReport( const CommissionReport& commissionReport);
@@ -132,7 +133,6 @@ public:
     virtual void tickSnapshotEnd( int reqId) {};
     virtual void marketDataType( TickerId reqId, int marketDataType) {};
     virtual void commissionAndFeesReport( const CommissionAndFeesReport& commissionAndFeesReport) {};
-    virtual void positionEnd() {};
     virtual void verifyMessageAPI( const std::string& apiData) {};
     virtual void verifyCompleted( bool isSuccessful, const std::string& errorText) {};
     virtual void displayGroupList( int reqId, const std::string& groups) {};
